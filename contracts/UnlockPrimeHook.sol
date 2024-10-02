@@ -4,7 +4,7 @@ import "@unlock-protocol/contracts/dist/PublicLock/IPublicLockV13.sol";
 pragma solidity ^0.8.27;
 
 // Uncomment this line to use console.log
-import "hardhat/console.sol";
+// import "hardhat/console.sol";
 
 interface IUniswapOracleV3 {
     function PERIOD() external returns (uint256);
