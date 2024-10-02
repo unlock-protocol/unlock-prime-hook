@@ -8,7 +8,7 @@ const config: HardhatUserConfig = {
   networks: {
     hardhat: {
       hardfork: "london",
-      gasPrice: 50000000000, // ?
+      gasPrice: 100000000, // ?
       forking: {
         url: "https://rpc.unlock-protocol.com/8453",
         blockNumber: 20513139,

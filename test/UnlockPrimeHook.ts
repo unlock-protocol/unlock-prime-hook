@@ -33,18 +33,24 @@ describe("UnlockPrimeHook", function () {
     const Hook = await hre.ethers.getContractFactory("UnlockPrimeHook");
     const hook = await Hook.deploy(lock.getAddress(), oracle, weth);
 
-    // Set the hook on avatar
+    // Set the hook
     await (
       await lock.setEventHooks(
-        await hook.getAddress(),
+        await hook.getAddress(), // _onKeyPurchaseHook
         hre.ethers.ZeroAddress,
         hre.ethers.ZeroAddress,
         hre.ethers.ZeroAddress,
         hre.ethers.ZeroAddress,
-        hre.ethers.ZeroAddress,
+        await hook.getAddress(), // _onKeyExtendHook
         hre.ethers.ZeroAddress
       )
     ).wait();
+
+    // Fund the hook
+    await hre.network.provider.send("hardhat_setBalance", [
+      await hook.getAddress(),
+      "0x10000000000000000000",
+    ]);
 
     // Fund the deployer with some UP
     await hre.network.provider.request({
@@ -71,37 +77,171 @@ describe("UnlockPrimeHook", function () {
     return { lock, hook };
   }
 
-  describe("Deployment", function () {
-    it("should return the right keyPrice", async function () {
-      const { lock, hook } = await loadFixture(deployContracts);
-      const [deployer] = await hre.ethers.getSigners();
+  it("should return the right keyPrice", async function () {
+    const { lock, hook } = await loadFixture(deployContracts);
+    const [deployer] = await hre.ethers.getSigners();
 
-      expect(await lock.purchasePriceFor(deployer, deployer, "0x")).to.equal(
-        lockArgs.keyPrice
-      );
-      expect(await lock.onKeyPurchaseHook()).to.equal(await hook.getAddress());
-    });
+    expect(await lock.purchasePriceFor(deployer, deployer, "0x")).to.equal(
+      lockArgs.keyPrice
+    );
+    expect(await lock.onKeyPurchaseHook()).to.equal(await hook.getAddress());
+  });
 
-    it("should let the user make a purchase", async () => {
-      const { lock, hook } = await loadFixture(deployContracts);
-      const [deployer] = await hre.ethers.getSigners();
+  it("should let the user make a purchase", async () => {
+    const { lock, hook } = await loadFixture(deployContracts);
+    const [deployer] = await hre.ethers.getSigners();
 
-      // Approve UP to be spent!
-      const upContract = await hre.ethers.getContractAt(UP_ABI, up, deployer);
-      await (
-        await upContract.approve(lock.getAddress(), lockArgs.keyPrice)
-      ).wait();
+    // Approve UP to be spent!
+    const upContract = await hre.ethers.getContractAt(UP_ABI, up, deployer);
+    await (
+      await upContract.approve(lock.getAddress(), lockArgs.keyPrice)
+    ).wait();
 
-      // Make a purchase!
-      await (
-        await lock.purchase(
-          [lockArgs.keyPrice],
-          [deployer.getAddress()],
-          [deployer.getAddress()],
-          [deployer.getAddress()],
-          ["0x"]
-        )
-      ).wait();
-    });
+    const initialRefund = await hook.refunds(await deployer.getAddress(), 0);
+    const initialDeadline = await hook.refunds(await deployer.getAddress(), 1);
+    expect(initialRefund).to.equal(0);
+    expect(initialRefund).to.equal(initialDeadline);
+
+    // Make a purchase!
+    await (
+      await lock.purchase(
+        [lockArgs.keyPrice],
+        [deployer.getAddress()],
+        [deployer.getAddress()],
+        [deployer.getAddress()],
+        ["0x"]
+      )
+    ).wait();
+
+    // Refund should be set to be not 0 and set in the future!
+    const refund = await hook.refunds(await deployer.getAddress(), 0);
+    const deadline = await hook.refunds(await deployer.getAddress(), 1);
+    expect(refund).to.greaterThan(0);
+    expect(Number(deadline)).to.greaterThan(
+      Math.floor(new Date().getTime() / 1000) + 60 * 60 * 24 * 13
+    );
+  });
+
+  it("should let the user claim a refund once if enough time has passed", async () => {
+    const { lock, hook } = await loadFixture(deployContracts);
+    const [deployer] = await hre.ethers.getSigners();
+
+    // Approve UP to be spent!
+    const upContract = await hre.ethers.getContractAt(UP_ABI, up, deployer);
+    await (
+      await upContract.approve(lock.getAddress(), lockArgs.keyPrice)
+    ).wait();
+
+    // Make a purchase!
+    await (
+      await lock.purchase(
+        [lockArgs.keyPrice],
+        [deployer.getAddress()],
+        [deployer.getAddress()],
+        [deployer.getAddress()],
+        ["0x"]
+      )
+    ).wait();
+
+    await expect(hook.claimRefund()).to.be.revertedWith(
+      "Refund not available yet"
+    );
+    const deadline = await hook.refunds(await deployer.getAddress(), 1);
+    const refund = await hook.refunds(await deployer.getAddress(), 0);
+    await time.increaseTo(BigInt(deadline));
+
+    const balanceBefore = await hre.ethers.provider.getBalance(
+      deployer.getAddress()
+    );
+
+    const receipt = await (await hook.claimRefund()).wait();
+    const transactionCost = receipt!.gasUsed * receipt!.gasPrice;
+    const balanceAfter = await hre.ethers.provider.getBalance(
+      deployer.getAddress()
+    );
+    expect(balanceAfter).to.equal(balanceBefore + refund - transactionCost);
+
+    // Withdraw again should fail!
+    await expect(hook.claimRefund()).to.be.revertedWith("No refund available");
+  });
+
+  it("should handle extensions", async () => {
+    const { lock, hook } = await loadFixture(deployContracts);
+    const [deployer] = await hre.ethers.getSigners();
+
+    // Approve UP to be spent!
+    const upContract = await hre.ethers.getContractAt(UP_ABI, up, deployer);
+    await (
+      await upContract.approve(lock.getAddress(), lockArgs.keyPrice * 10n)
+    ).wait();
+
+    // Make a purchase!
+    await (
+      await lock.purchase(
+        [lockArgs.keyPrice],
+        [deployer.getAddress()],
+        [deployer.getAddress()],
+        [deployer.getAddress()],
+        ["0x"]
+      )
+    ).wait();
+
+    const refund = await hook.refunds(await deployer.getAddress(), 0);
+    const delay = await hook.refunds(await deployer.getAddress(), 1);
+
+    // We only minted token 1
+    const expiration = await lock.keyExpirationTimestampFor(1);
+    // ok, let's wait for the key to expire!
+    await time.increaseTo(BigInt(expiration));
+
+    // And now let's extend the key
+    await (
+      await lock.extend(lockArgs.keyPrice, 1, deployer.getAddress(), "0x")
+    ).wait();
+
+    expect(await hook.refunds(await deployer.getAddress(), 0)).to.greaterThan(
+      refund
+    );
+    expect(await hook.refunds(await deployer.getAddress(), 1)).to.greaterThan(
+      delay
+    );
+  });
+
+  it("should handle early extensions and not increase the refund", async () => {
+    const { lock, hook } = await loadFixture(deployContracts);
+    const [deployer] = await hre.ethers.getSigners();
+
+    // Approve UP to be spent!
+    const upContract = await hre.ethers.getContractAt(UP_ABI, up, deployer);
+    await (
+      await upContract.approve(lock.getAddress(), lockArgs.keyPrice * 10n)
+    ).wait();
+
+    // Make a purchase!
+    await (
+      await lock.purchase(
+        [lockArgs.keyPrice],
+        [deployer.getAddress()],
+        [deployer.getAddress()],
+        [deployer.getAddress()],
+        ["0x"]
+      )
+    ).wait();
+
+    const refund = await hook.refunds(await deployer.getAddress(), 0);
+
+    // We only minted token 1
+    const expiration = await lock.keyExpirationTimestampFor(1);
+
+    // Ok let's cancel the key.
+    await (await lock.cancelAndRefund(1)).wait();
+    expect(await hook.refunds(await deployer.getAddress(), 0)).to.equal(refund);
+
+    // And now let's extend the key
+    await (
+      await lock.extend(lockArgs.keyPrice, 1, deployer.getAddress(), "0x")
+    ).wait();
+
+    expect(await hook.refunds(await deployer.getAddress(), 0)).to.equal(refund);
   });
 });

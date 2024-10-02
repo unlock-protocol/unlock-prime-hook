@@ -30,7 +30,7 @@ contract UnlockPrimeHook {
     address public unlockPrime;
     address public oracle;
     address public weth;
-    mapping(address => uint[2]) refunds; // [amount, time]
+    mapping(address => uint[2]) public refunds; // [amount, time]
 
     event UnlockPrimeSet(address);
     event OracleSet(address);
@@ -81,6 +81,34 @@ contract UnlockPrimeHook {
         return IPublicLockV13(msg.sender).keyPrice();
     }
 
+    function recordRefund(address beneficiary, uint amount) private {
+        address UPAddress = IPublicLockV13(unlockPrime).tokenAddress();
+        // At this point, check the pricePaid and its value against Uniswap oracles
+        uint valueInETH = IUniswapOracleV3(oracle).updateAndConsult(
+            UPAddress,
+            amount,
+            weth
+        );
+        // Store the refund and the delay
+        uint existingRefund = refunds[beneficiary][0];
+        uint existingDelay = refunds[beneficiary][1];
+        uint newRefund = (valueInETH * 11) / 10; // 10% bonus
+        uint newDelay = block.timestamp + 60 * 60 * 24 * 14; // 2 weeks delay!
+
+        if (existingDelay < block.timestamp) {
+            refunds[beneficiary] = [existingRefund + newRefund, newDelay];
+        } else {
+            // One needs to wait for the delay to be able to increase their refund.
+            refunds[beneficiary] = [newRefund, newDelay];
+        }
+
+        emit RefundSet(
+            beneficiary,
+            refunds[beneficiary][0],
+            refunds[beneficiary][1]
+        );
+    }
+
     // This function is called by Unlock when a key is purchased
     function onKeyPurchase(
         uint256 /* tokenId */,
@@ -89,32 +117,33 @@ contract UnlockPrimeHook {
         address /* referrer */,
         bytes calldata /* data */,
         uint256 /* minKeyPrice */,
-        uint256 pricePaid
+        uint256 /* pricePaid */
     ) external {
         if (msg.sender == unlockPrime) {
-            address UPAddress = IPublicLockV13(msg.sender).tokenAddress();
-            // At this point, check the pricePaid and its value against Uniswap oracles
-            uint valueInETH = IUniswapOracleV3(oracle).updateAndConsult(
-                UPAddress,
-                pricePaid,
-                weth
-            );
-            // Store the refund and the delay
-            uint refundAmount = refunds[from][0] + (valueInETH * 11) / 10; // 10% bonus
-            uint delay = block.timestamp + 60 * 60 * 24 * 14; // 2 weeks delay!
+            recordRefund(from, IPublicLockV13(msg.sender).keyPrice());
+        }
+    }
 
-            refunds[from] = [refundAmount, delay];
-            emit RefundSet(from, refundAmount, delay);
+    // This function is called by Unlock when a key is extended
+    function onKeyExtend(
+        uint tokenId,
+        address /* sender */,
+        uint /* newTimestamp */,
+        uint /* expirationTimestam p*/
+    ) external {
+        IPublicLockV13 lock = IPublicLockV13(msg.sender);
+        if (msg.sender == unlockPrime) {
+            recordRefund(lock.ownerOf(tokenId), lock.keyPrice());
         }
     }
 
     // Claim the refund!
-    function clainRefund() external {
+    function claimRefund() external {
         uint[2] memory refund = refunds[msg.sender];
         require(refund[0] > 0, "No refund available");
         require(refund[1] < block.timestamp, "Refund not available yet");
         refunds[msg.sender] = [0, 0];
-        emit RefundPaid(msg.sender, refund[0]);
         payable(msg.sender).transfer(refund[0]);
+        emit RefundPaid(msg.sender, refund[0]);
     }
 }
