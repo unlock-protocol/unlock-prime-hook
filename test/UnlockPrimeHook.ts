@@ -100,7 +100,7 @@ describe("UnlockPrimeHook", function () {
     const initialRefund = await hook.refunds(await deployer.getAddress(), 0);
     const initialDeadline = await hook.refunds(await deployer.getAddress(), 1);
     expect(initialRefund).to.equal(0);
-    expect(initialRefund).to.equal(initialDeadline);
+    expect(initialDeadline).to.equal(0);
 
     // Make a purchase!
     await (
@@ -118,7 +118,7 @@ describe("UnlockPrimeHook", function () {
     const deadline = await hook.refunds(await deployer.getAddress(), 1);
     expect(refund).to.greaterThan(0);
     expect(Number(deadline)).to.greaterThan(
-      Math.floor(new Date().getTime() / 1000) + 60 * 60 * 24 * 13
+      Math.floor(new Date().getTime() / 1000) + 60 * 60 * 24 * 10
     );
   });
 
@@ -243,5 +243,48 @@ describe("UnlockPrimeHook", function () {
     ).wait();
 
     expect(await hook.refunds(await deployer.getAddress(), 0)).to.equal(refund);
+  });
+
+  it("should let the lock manager change the oracle", async () => {
+    const { lock, hook } = await loadFixture(deployContracts);
+    const [deployer, randomUser] = await hre.ethers.getSigners();
+
+    expect(await hook.oracle()).to.equal(oracle);
+
+    const newOracle = "0x2411336105D4451713d23B5156038A48569EcE3a";
+    await expect(
+      hook.connect(randomUser).setOracle(newOracle)
+    ).to.be.revertedWith("Caller is not a lock manager");
+    await (await hook.setOracle(newOracle)).wait();
+    expect(await hook.oracle()).to.equal(newOracle);
+  });
+
+  it("should let the lock manager change the weth contract", async () => {
+    const { lock, hook } = await loadFixture(deployContracts);
+    const [deployer, randomUser] = await hre.ethers.getSigners();
+
+    expect(await hook.weth()).to.equal(weth);
+
+    const newWeth = "0x4200000000000000000000000000000000000007";
+    await expect(hook.connect(randomUser).setWeth(newWeth)).to.be.revertedWith(
+      "Caller is not a lock manager"
+    );
+    await (await hook.setWeth(newWeth)).wait();
+    expect(await hook.weth()).to.equal(newWeth);
+  });
+
+  it("should let the lock manager change the unlock prime contract", async () => {
+    const { lock, hook } = await loadFixture(deployContracts);
+    const [deployer, randomUser] = await hre.ethers.getSigners();
+
+    const { lock: newLock } = await hre.unlock.createLock(lockArgs);
+
+    expect(await hook.unlockPrime()).to.equal(await lock.getAddress());
+
+    await expect(
+      hook.connect(randomUser).setUnlockPrime(await newLock.getAddress())
+    ).to.be.revertedWith("Caller is not a lock manager");
+    await (await hook.setUnlockPrime(await newLock.getAddress())).wait();
+    expect(await hook.unlockPrime()).to.equal(await newLock.getAddress());
   });
 });

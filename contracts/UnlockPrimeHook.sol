@@ -49,26 +49,29 @@ contract UnlockPrimeHook {
 
     // Set the unlock prime address, only callable by lock manager
     function setUnlockPrime(address _unlockPrime) public {
-        if (IPublicLockV13(unlockPrime).isLockManager(msg.sender)) {
-            unlockPrime = _unlockPrime;
-            emit UnlockPrimeSet(_unlockPrime);
+        if (!IPublicLockV13(unlockPrime).isLockManager(msg.sender)) {
+            revert("Caller is not a lock manager");
         }
+        unlockPrime = _unlockPrime;
+        emit UnlockPrimeSet(_unlockPrime);
     }
 
     // Set the oracle address, only callable by lock manager
     function setOracle(address _oracle) public {
-        if (IPublicLockV13(unlockPrime).isLockManager(msg.sender)) {
-            oracle = _oracle;
-            emit OracleSet(_oracle);
+        if (!IPublicLockV13(unlockPrime).isLockManager(msg.sender)) {
+            revert("Caller is not a lock manager");
         }
+        oracle = _oracle;
+        emit OracleSet(_oracle);
     }
 
     // Set the WETH address, only callable by lock manager
     function setWeth(address _weth) public {
-        if (IPublicLockV13(unlockPrime).isLockManager(msg.sender)) {
-            weth = _weth;
-            emit WethSet(_weth);
+        if (!IPublicLockV13(unlockPrime).isLockManager(msg.sender)) {
+            revert("Caller is not a lock manager");
         }
+        weth = _weth;
+        emit WethSet(_weth);
     }
 
     // Return the price of a key
