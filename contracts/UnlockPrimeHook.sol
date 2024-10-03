@@ -132,7 +132,7 @@ contract UnlockPrimeHook {
         uint tokenId,
         address /* sender */,
         uint /* newTimestamp */,
-        uint /* expirationTimestam p*/
+        uint /* expirationTimestamp */
     ) external {
         IPublicLockV13 lock = IPublicLockV13(msg.sender);
         if (msg.sender == unlockPrime) {
