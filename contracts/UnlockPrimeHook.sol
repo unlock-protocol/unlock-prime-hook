@@ -39,6 +39,17 @@ contract UnlockPrimeHook {
     event RefundPaid(address, uint256);
 
     constructor(address _unlockPrime, address _oracle, address _weth) {
+        initialize(_unlockPrime, _oracle, _weth);
+    }
+
+    function initialize(
+        address _unlockPrime,
+        address _oracle,
+        address _weth
+    ) public {
+        if (unlockPrime != address(0)) {
+            revert("Already initialized");
+        }
         unlockPrime = _unlockPrime;
         emit UnlockPrimeSet(_unlockPrime);
         oracle = _oracle;
