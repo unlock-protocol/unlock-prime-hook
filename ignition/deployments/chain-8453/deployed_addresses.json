@@ -1,0 +1,6 @@
+{
+  "ProxyModule#UnlockPrimeHook": "0xed41607720802262CB2dacbCda544D4aaa4a1173",
+  "ProxyModule#TransparentUpgradeableProxy": "0x4fF92448439972F9eD212fe525eCd6784F0205E2",
+  "ProxyModule#ProxyAdmin": "0xC180fAf1c1E651B3cb4F683Fd0771362A312F0eE",
+  "UnlockPrimeHookModule#UnlockPrimeHook": "0x4fF92448439972F9eD212fe525eCd6784F0205E2"
+}
