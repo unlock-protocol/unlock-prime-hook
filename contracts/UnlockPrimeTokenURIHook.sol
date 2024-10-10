@@ -1,5 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.5.17 <0.9.0;
+
+/**
+ * @title Token URI hook for Unlock Prime
+ * @author Clement Renaud <clement@unlock-protocol.com>
+ * @notice This adds a way for the token URI to return a dynamic svg containing info about the token (validity and owner)
+ */
+
 import "@openzeppelin/contracts/utils/Base64.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
