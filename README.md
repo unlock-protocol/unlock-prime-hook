@@ -8,5 +8,11 @@ The hook keeps tracks of the ETH to refund on purchase and renewals.
 For debugging purposes, this will generate the svg as a `test.svg` file that can be seen in the browser
 
 ```
-yarn hardhat run scripts/svg.js
+yarn svg
+```
+
+There is also a task that will "atch" rebuild the svg whenever it is edited
+
+```
+yarn watch:svg
 ```

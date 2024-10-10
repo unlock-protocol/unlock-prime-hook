@@ -4,7 +4,8 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "watch": "ls contracts/UnlockPrimeTokenURIHook.sol | entr yarn hardhat run scripts/svg.js"
+    "svg": "yarn hardhat run scripts/svg.js",
+    "watch:svg": "ls contracts/UnlockPrimeTokenURIHook.sol | entr yarn svg"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.8",
