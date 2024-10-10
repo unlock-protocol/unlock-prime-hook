@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "svg": "yarn hardhat run scripts/svg.js",
+    "watch:svg": "ls contracts/UnlockPrimeTokenURIHook.sol | entr yarn svg"
+  },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.8",
     "@nomicfoundation/hardhat-ethers": "^3.0.8",
