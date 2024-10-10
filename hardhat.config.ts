@@ -47,6 +47,7 @@ const config: HardhatUserConfig = {
   etherscan: {
     apiKey: {
       base: "SYZF9HBSSGGVKXJNTP4318PT2HP4DRG4P5",
+      baseSepolia: 'F9E5R4E8HIJQZMRE9U9IZMP7NVZ2IAXNB8',
     },
   },
   sourcify: {
