@@ -146,7 +146,11 @@ contract UnlockPrimeTokenURIHook {
 
         // create the json that includes the image
         string memory json = string(
-            abi.encodePacked('{"image":"', image, '"}')
+            abi.encodePacked(
+                '{ "name" : "Unlock Prime", "external_url":"https://app.unlock-protocol.com/prime","description":"","image":"',
+                image,
+                '"}'
+            )
         );
         // render the base64 encoded json metadata
         return
