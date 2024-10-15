@@ -26,7 +26,7 @@ const config: HardhatUserConfig = {
       gasPrice: 100000000, // ?
       forking: {
         url: "https://rpc.unlock-protocol.com/8453",
-        blockNumber: 20513139,
+        blockNumber: 21118253,
       },
       chainId: 8453,
       chains: {
@@ -47,7 +47,7 @@ const config: HardhatUserConfig = {
   etherscan: {
     apiKey: {
       base: "SYZF9HBSSGGVKXJNTP4318PT2HP4DRG4P5",
-      baseSepolia: 'F9E5R4E8HIJQZMRE9U9IZMP7NVZ2IAXNB8',
+      baseSepolia: "F9E5R4E8HIJQZMRE9U9IZMP7NVZ2IAXNB8",
     },
   },
   sourcify: {
