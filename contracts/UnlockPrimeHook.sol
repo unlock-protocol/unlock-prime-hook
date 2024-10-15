@@ -126,15 +126,15 @@ contract UnlockPrimeHook {
     // This function is called by Unlock when a key is purchased
     function onKeyPurchase(
         uint256 /* tokenId */,
-        address from,
-        address /* recipient */,
+        address /* from */,
+        address recipient,
         address /* referrer */,
         bytes calldata /* data */,
         uint256 /* minKeyPrice */,
         uint256 /* pricePaid */
     ) external {
         if (msg.sender == unlockPrime) {
-            recordRefund(from, IPublicLockV13(msg.sender).keyPrice());
+            recordRefund(recipient, IPublicLockV13(msg.sender).keyPrice());
         }
     }
 
