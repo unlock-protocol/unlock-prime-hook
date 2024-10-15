@@ -147,7 +147,7 @@ contract UnlockPrimeTokenURIHook {
         // create the json that includes the image
         string memory json = string(
             abi.encodePacked(
-                '{ "name" : "Unlock Prime", "external_url":"https://app.unlock-protocol.com/prime","description":"","image":"',
+                '{ "name" : "Unlock Prime", "external_url":"https://app.unlock-protocol.com/prime","description":"Unlock Prime offers enhanced features, monthly ETH rewards, unlimited events, and exclusive partner discounts for members. Bring your onchain experiences to the next level with a premium membership that works across all the apps from Unlock Labs","image":"',
                 image,
                 '"}'
             )
