@@ -17,9 +17,14 @@ const upgradeModule = buildModule("UpgradeModule", (m) => {
     ]
   );
 
-  m.call(proxyAdmin, "upgrade", [proxy, UnlockPrimeHookWithRecipient], {
-    from: proxyAdminOwner,
-  });
+  m.call(
+    proxyAdmin,
+    "upgradeAndCall",
+    [proxy, UnlockPrimeHookWithRecipient, "0x"],
+    {
+      from: proxyAdminOwner,
+    }
+  );
 
   return { proxyAdmin, proxy };
 });
@@ -27,7 +32,7 @@ const upgradeModule = buildModule("UpgradeModule", (m) => {
 const unlockPrimeHookWithRecipientModule = buildModule(
   "UnlockPrimeHookWithRecipientModule",
   (m) => {
-    const { proxy, proxyAdmin } = m.useModule(proxyModule);
+    const { proxy, proxyAdmin } = m.useModule(upgradeModule);
 
     const unlockPrimeHook = m.contractAt("UnlockPrimeHookWithRecipient", proxy);
 
