@@ -57,7 +57,7 @@ export default unlockPrimeHookModule;
 // const UnlockPrimeHook = buildModule("UnlockPrimeHook", (m) => {
 //   const hook = m.contract("UnlockPrimeHook", [
 //     "0x01D8412eE898A74cE44187F4877Bf9303E3C16e5", // Unlock Prime
-//     "0x01D8412eE898A74cE44187F4877Bf9303E3C16e5", // Oracle
+//     "0xfa7AC1c24339f629826C419eC95961Df58563438", // Oracle
 //     "0x4200000000000000000000000000000000000006", // Weth
 //   ]);
 

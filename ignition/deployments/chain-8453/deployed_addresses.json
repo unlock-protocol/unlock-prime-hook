@@ -1,6 +1,6 @@
 {
-  "ProxyModule#UnlockPrimeHook": "0xed41607720802262CB2dacbCda544D4aaa4a1173",
-  "ProxyModule#TransparentUpgradeableProxy": "0x4fF92448439972F9eD212fe525eCd6784F0205E2",
-  "ProxyModule#ProxyAdmin": "0xC180fAf1c1E651B3cb4F683Fd0771362A312F0eE",
-  "UnlockPrimeHookModule#UnlockPrimeHook": "0x4fF92448439972F9eD212fe525eCd6784F0205E2"
+  "ProxyModule#UnlockPrimeHook": "0x9E0686E70Be17f882be25785bF1a8651908Bb981",
+  "ProxyModule#TransparentUpgradeableProxy": "0x3Ad44f5a1F61d88775d4E4660b821DFC05887A1F",
+  "ProxyModule#ProxyAdmin": "0x16C034060ED720D92608905E149b9AA5F71feb75",
+  "UnlockPrimeHookModule#UnlockPrimeHook": "0x3Ad44f5a1F61d88775d4E4660b821DFC05887A1F"
 }
