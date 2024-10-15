@@ -16,3 +16,11 @@ There is also a task that will "atch" rebuild the svg whenever it is edited
 ```
 yarn watch:svg
 ```
+
+## Deployment
+
+_TokenURI hook_
+
+```
+yarn hardhat ignition deploy ignition/modules/UnlockPrimeTokenURI.ts
+```
