@@ -2,5 +2,6 @@
   "ProxyModule#UnlockPrimeHook": "0x9E0686E70Be17f882be25785bF1a8651908Bb981",
   "ProxyModule#TransparentUpgradeableProxy": "0x3Ad44f5a1F61d88775d4E4660b821DFC05887A1F",
   "ProxyModule#ProxyAdmin": "0x16C034060ED720D92608905E149b9AA5F71feb75",
-  "UnlockPrimeHookModule#UnlockPrimeHook": "0x3Ad44f5a1F61d88775d4E4660b821DFC05887A1F"
+  "UnlockPrimeHookModule#UnlockPrimeHook": "0x3Ad44f5a1F61d88775d4E4660b821DFC05887A1F",
+  "UnlockPrimeTokenURIHook#UnlockPrimeTokenURIHook": "0x58cFCddC4B9254633B864E9d71e3217e464BeEcB"
 }
