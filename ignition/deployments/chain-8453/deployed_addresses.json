@@ -5,5 +5,6 @@
   "UnlockPrimeHookModule#UnlockPrimeHook": "0x3Ad44f5a1F61d88775d4E4660b821DFC05887A1F",
   "UnlockPrimeTokenURIHook#UnlockPrimeTokenURIHook": "0x58cFCddC4B9254633B864E9d71e3217e464BeEcB",
   "UnlockPrimeHookWithRecipientModule#UnlockPrimeHookWithRecipient": "0x3Ad44f5a1F61d88775d4E4660b821DFC05887A1F",
-  "UpgradeModule#UnlockPrimeHookWithRecipient": "0x3aB34e2885c29B6D91C881e3107641849e7e627E"
+  "UpgradeModule#UnlockPrimeHookWithRecipient": "0x3aB34e2885c29B6D91C881e3107641849e7e627E",
+  "UpgradeModuleWithFallback#UnlockPrimeHookWithRecipientAndFallback": "0xb77fb0a2543F889e55fb794cF649C7D12856af17"
 }
